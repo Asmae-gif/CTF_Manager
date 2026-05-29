@@ -1,0 +1,12 @@
+node_modules/
+.env
+vendor/
+node_modules/
+.env
+vendor/
+.env
+node_modules/
+.env
+vendor/
+.vscode/
+*.stackdump

@@ -1,0 +1,69 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-pirate-gold: #f6b23b;
+  --color-pirate-cyan: #22d3ee;
+  --color-pirate-bg: #050a14;
+  --color-pirate-card: rgba(8, 18, 33, 0.95);
+  --color-pirate-line: #0e213b;
+  
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Cormorant Garamond", serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+@layer base {
+  body {
+    @apply bg-pirate-bg text-white antialiased selection:bg-pirate-gold/30;
+    background-image: 
+      linear-gradient(var(--color-pirate-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--color-pirate-line) 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-position: center center;
+  }
+}
+
+@layer components {
+  .pirate-card {
+    @apply relative border border-pirate-line bg-pirate-card rounded-2xl overflow-hidden;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+  }
+  
+  .pirate-card::before {
+    content: "";
+    @apply absolute inset-0 pointer-events-none opacity-[0.03];
+    background: repeating-linear-gradient(
+      0deg,
+      #fff,
+      #fff 1px,
+      transparent 1px,
+      transparent 2px
+    );
+  }
+
+  .pirate-header {
+    @apply font-serif text-4xl md:text-5xl font-medium tracking-tight text-pirate-gold;
+    text-shadow: 0 4px 12px rgba(246, 178, 59, 0.2);
+  }
+
+  .pirate-sub {
+    @apply font-mono text-sm uppercase tracking-[0.2em] text-white/40 mb-8;
+  }
+
+  .pirate-label {
+    @apply font-mono text-[10px] md:text-xs uppercase tracking-widest text-pirate-cyan font-semibold block mb-2;
+  }
+
+  .pirate-input {
+    @apply w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 font-sans text-white/90 focus:outline-none focus:border-pirate-cyan/50 focus:bg-white/10 transition-all placeholder:text-white/20;
+  }
+
+  .pirate-btn {
+    @apply w-full bg-pirate-gold hover:bg-pirate-gold/90 text-pirate-bg font-mono font-bold uppercase tracking-widest py-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(246,178,59,0.3)];
+  }
+
+  .pirate-link {
+    @apply font-mono text-xs text-white/60 hover:text-pirate-gold transition-colors;
+  }
+}
