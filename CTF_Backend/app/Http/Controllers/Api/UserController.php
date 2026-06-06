@@ -26,6 +26,7 @@ class UserController extends Controller
             'username'     => $user->username,
             'fullname'     => $user->fullname,
             'email'        => $user->email,
+            
             'avatar'       => $user->avatar
                                 ? url(Storage::url($user->avatar))
                                 : null,

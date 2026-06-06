@@ -23,7 +23,6 @@ class ScoreboardController extends Controller
             ->withCount([
                 'submissions as solved_count' => fn($q) =>
                     $q->where('is_correct', true)
-                      ->groupBy('challenge_id') // ← distinct remplacé par groupBy
             ])
 
             ->withCount('members')
@@ -36,6 +35,7 @@ class ScoreboardController extends Controller
 
             ->with([
                 'leader:id,username,fullname',
+                'competition:id,title',
                 'leader.userBadges' => function ($q) use ($competitionId) {
                     if ($competitionId) {
                         $q->where('competition_id', (int) $competitionId);
@@ -70,13 +70,13 @@ class ScoreboardController extends Controller
         $ranked = $teams->map(function ($team, $index) use ($firstBloodCounts) {
             return [
                 'rank' => $index + 1,
-
-                'team' => [
-                    'id'     => $team->id,
-                    'name'   => $team->name,
-                    'avatar' => $team->avatar,
-                ],
-
+                'id'     => $team->id,
+                'name'   => $team->name,
+                'avatar' => $team->avatar,
+                'competition' => $team->competition ? [
+                    'id'    => $team->competition->id,
+                    'title' => $team->competition->title,
+                ] : null,
                 'leader' => $team->leader ? [
                     'id'       => $team->leader->id,
                     'username' => $team->leader->username,
@@ -90,11 +90,11 @@ class ScoreboardController extends Controller
                             'placement'   => (int) $ub->placement,
                         ])->values()->all(),
                 ] : null,
-
                 'score'         => $team->score,
                 'solved_count'  => $team->solved_count ?? 0,
                 'members_count' => $team->members_count,
-                'first_bloods'  => $firstBloodCounts[$team->id] ?? 0, // ✅ depuis le tableau
+                'members'       => [], // Chargé via /teams/{id} dans le modal
+                'first_bloods'  => $firstBloodCounts[$team->id] ?? 0,
                 'last_solve_at' => $team->last_solve_at,
                 'created_at'    => $team->created_at,
             ];

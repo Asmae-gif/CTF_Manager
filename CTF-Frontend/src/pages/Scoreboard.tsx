@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Crown, Users, Trophy, X, Globe, Loader2 } from 'lucide-react';
+import { Crown, Users, Trophy, X, Loader2 } from 'lucide-react';
 import { api } from '../api/client';
 import { useLocation } from 'react-router-dom';
 import { messageFromAxiosError } from '../api/auth';
@@ -13,6 +13,7 @@ interface Team {
   leader?: { username: string; country?: string };
   members?: any[];
   competition?: { title: string };
+  members_count?: number;
 }
 
 const POSITION_STYLE: Record<number, string> = {
@@ -106,7 +107,7 @@ export default function Scoreboard() {
                     <p className="font-mono text-sm text-white text-center truncate w-full px-2">{team.name}</p>
                     <p className={`font-mono text-xs mt-1 ${POSITION_STYLE[realPos]}`}>{team.score} pts</p>
                     <span className="mt-2 text-[9px] font-mono uppercase tracking-widest px-2 py-0.5 rounded border text-pirate-cyan border-pirate-cyan/30 bg-pirate-cyan/10">
-                      {team.members?.length ?? 0} membres
+                      {team.members_count ?? 0} membres
                     </span>
                   </motion.div>
                 );
@@ -149,7 +150,7 @@ export default function Scoreboard() {
                     {team.competition?.title ?? 'Aucune'}
                   </div>
                   <div className="col-span-1 font-mono text-xs text-gray-400 flex items-center gap-1">
-                    <Users size={11} className="text-pirate-cyan" /> {team.members?.length ?? 0}
+                    <Users size={11} className="text-pirate-cyan" /> {team.members_count ?? 0}
                   </div>
                   <div className="col-span-2 text-right font-mono text-sm text-pirate-gold font-bold">
                     {team.score} pts

@@ -67,5 +67,27 @@ class ChallengeSeeder extends Seeder
                 $challenge->hints()->create($hint);
             }
         }
+
+        $juniorCompetition = Competition::where('slug', 'ctf-junior-2026')->first();
+        if ($juniorCompetition) {
+            foreach ($juniorCompetition->challenges as $challenge) {
+                if ($challenge->hints()->exists()) {
+                    continue;
+                }
+
+                $challenge->hints()->createMany([
+                    [
+                        'content' => 'Regarde d’abord l’énoncé et identifie la catégorie.',
+                        'cost'    => 10,
+                        'order'   => 1,
+                    ],
+                    [
+                        'content' => 'Cherche les indices simples dans les fichiers fournis.',
+                        'cost'    => 20,
+                        'order'   => 2,
+                    ],
+                ]);
+            }
+        }
     }
 }

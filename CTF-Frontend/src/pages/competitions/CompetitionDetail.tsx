@@ -19,6 +19,8 @@ export default function CompetitionDetail() {
     const [joinMsg, setJoinMsg] = useState("");
     const [selected, setSelected] = useState<Challenge | null>(null);
     const [hints, setHints] = useState<any[]>([]);
+    const [hintsLoading, setHintsLoading] = useState(false);
+    const [hintsError, setHintsError] = useState("");
     const [flag, setFlag] = useState("");
     const [submitting, setSubmitting] = useState(false);
     const [submitResult, setSubmitResult] = useState<any>(null);
@@ -97,10 +99,18 @@ const handleDownload = async () => {
         setSelected(ch);
         setFlag("");
         setSubmitResult(null);
+        setHints([]);
+        setHintsError("");
+        setHintsLoading(true);
         try {
             const res = await api.get("/challenges/" + ch.id + "/hints");
             setHints(res.data);
-        } catch { setHints([]); }
+        } catch (err: any) {
+            setHints([]);
+            setHintsError(err?.response?.data?.message || "Impossible de charger les hints.");
+        } finally {
+            setHintsLoading(false);
+        }
     };
 
     const submitFlag = async (e: React.FormEvent) => {
@@ -280,7 +290,14 @@ const handleDownload = async () => {
                                             <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-pirate-cyan bg-pirate-cyan/5 px-2 py-0.5 rounded">
                                                 {ch.category?.name ?? ch.category}
                                             </span>
-                                            <span className="font-serif text-pirate-gold italic">{ch.points} pts</span>
+                                            <div className="flex items-center gap-2">
+                                                {ch.hints_count > 0 && (
+                                                    <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-pirate-gold bg-pirate-gold/10 px-2 py-0.5 rounded">
+                                                        {ch.hints_count} hint{ch.hints_count > 1 ? 's' : ''}
+                                                    </span>
+                                                )}
+                                                <span className="font-serif text-pirate-gold italic">{ch.points} pts</span>
+                                            </div>
                                         </div>
                                         <h3 className="font-serif text-lg text-white mb-1 group-hover:text-pirate-gold transition-colors">{ch.title}</h3>
                                         <p className="text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-4 inline-flex items-center gap-1.5">
@@ -356,25 +373,33 @@ const handleDownload = async () => {
                             )}
                         </form>
 
-                        {hints.length > 0 && (
-                            <div className="bg-white/5 border border-white/10 rounded-xl p-6">
+                        {(hints.length > 0 || hintsLoading || hintsError || (selected as any)?.hints_count > 0) && (
+                            <div className="bg-white/5 border border-white/10 rounded-xl p-6 mb-6">
                                 <h3 className="font-serif text-lg text-white flex items-center gap-2 mb-4">
                                     <Lightbulb size={18} className="text-pirate-gold" /> Hints
                                 </h3>
-                                <ul className="space-y-3">
-                                    {hints.map((h: any) => (
-                                        <li key={h.id} className="p-3 rounded-lg border border-white/5">
-                                            <p className="text-xs font-mono text-gray-500 mb-1">cost: {h.cost} pts</p>
-                                            {h.used || h.content ? (
-                                                <p className="text-sm text-gray-300">{h.content}</p>
-                                            ) : (
-                                                <button onClick={() => useHint(h.id)} className="font-mono text-xs uppercase tracking-widest text-pirate-cyan hover:text-pirate-gold transition-colors">
-                                                    Unlock hint #{h.order}
-                                                </button>
-                                            )}
-                                        </li>
-                                    ))}
-                                </ul>
+                                {hintsLoading ? (
+                                    <p className="text-sm text-gray-400">Chargement des hints…</p>
+                                ) : hintsError ? (
+                                    <p className="text-sm text-red-400">{hintsError}</p>
+                                ) : hints.length > 0 ? (
+                                    <ul className="space-y-3">
+                                        {hints.map((h: any) => (
+                                            <li key={h.id} className="p-3 rounded-lg border border-white/5">
+                                                <p className="text-xs font-mono text-gray-500 mb-1">cost: {h.cost} pts</p>
+                                                {h.used || h.content ? (
+                                                    <p className="text-sm text-gray-300">{h.content}</p>
+                                                ) : (
+                                                    <button type="button" onClick={() => useHint(h.id)} className="font-mono text-xs uppercase tracking-widest text-pirate-cyan hover:text-pirate-gold transition-colors">
+                                                        Unlock hint #{h.order + 1}
+                                                    </button>
+                                                )}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <p className="text-sm text-gray-400">Aucun hint disponible pour ce challenge.</p>
+                                )}
                             </div>
                         )}
                     </motion.div>

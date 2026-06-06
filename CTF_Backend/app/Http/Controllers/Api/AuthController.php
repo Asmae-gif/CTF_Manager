@@ -58,6 +58,7 @@ class AuthController extends Controller
         $request->validate([
             'email'    => 'required|email',
             'password' => 'required|string',
+
         ]);
 
         // 2. On essaie de connecter l'utilisateur

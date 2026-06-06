@@ -11,8 +11,8 @@ class UserSeeder extends Seeder
     {
         // ── 1. Admin — pour tester interface admin, gestion users/competitions ──
         User::create([
-            'username'  => 'blackbeard',
-            'fullname'  => 'Edward Teach',
+            'username'  => 'Admin',
+            'fullname'  => 'Administrator',
             'email'     => 'admin@ctf.ma',
             'password'  => 'Admin@1234',
             'type'      => User::TYPE_ADMIN,
@@ -33,7 +33,18 @@ class UserSeeder extends Seeder
             'bio'       => 'Captain of the Black Pearl.',
             'is_active' => true,
         ]);
-
+User::create([
+    'username'  => 'cyber_queen',
+    'fullname'  => 'Amina El Idrissi',
+    'email'     => 'amina.leader@ctf.ma',
+    'password'  => 'Leader@1234',
+    'type'      => User::TYPE_TEAM_LEADER,
+    'score'     => 1450,
+    'country'   => 'MA',
+    'skills'    => ['forensics', 'osint', 'web'],
+    'bio'       => 'Experienced CTF team leader specializing in digital forensics and OSINT challenges.',
+    'is_active' => true,
+]);
         // ── 3. Participant actif — pour tester rejoindre équipe, soumettre flag ──
         User::create([
             'username'  => 'anne_bonny',
@@ -69,7 +80,7 @@ class UserSeeder extends Seeder
             'password'  => 'Locked@1234',
             'type'      => User::TYPE_PARTICIPANT,
             'score'     => 200,
-            'is_active' => false,  // ← LOCKED dans la table admin
+            'is_active' => true,  // ← LOCKED dans la table admin
         ]);
 
         // ── 6. Participant sans skills/bio — pour tester profil vide ──

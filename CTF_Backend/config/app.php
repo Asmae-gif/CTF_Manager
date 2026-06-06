@@ -123,4 +123,14 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Frontend URL
+    |--------------------------------------------------------------------------
+    |
+    | This URL is used to generate links in emails that redirect to the React frontend
+    |
+    */
+    'frontend_url' => env('FRONTEND_URL', 'http://localhost:5173'),
+
 ];

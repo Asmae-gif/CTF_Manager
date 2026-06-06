@@ -13,8 +13,9 @@ export default function AdminChallenge() {
   const [form, setForm] = useState({
     title: "", category_id: "", flag: "",
     points: 100, difficulty: "easy", description: "",
-    url: "", file: null as File | null,
-});
+    url: "", file: null as File | null, hints: [] as Array<{content: string, cost: number}>,
+  });
+  const [newHint, setNewHint] = useState({ content: "", cost: 0 });
 
   const [editForm, setEditForm] = useState<any>({});
 
@@ -45,14 +46,19 @@ export default function AdminChallenge() {
         formData.append("points", form.points.toString());
         formData.append("difficulty", form.difficulty);
         formData.append("description", form.description);
+        formData.append("is_active", "1");
         if (form.url) formData.append("url", form.url);
         if (form.file) formData.append("file", form.file);
+        
+        // Add hints as JSON
+        if (form.hints.length > 0) {
+          formData.append("hints", JSON.stringify(form.hints));
+        }
 
-        await api.post("/competitions/" + selectedComp + "/challenges", formData, {
-            headers: { "Content-Type": "multipart/form-data" }
-        });
+        await api.post("/competitions/" + selectedComp + "/challenges", formData);
 
-        setForm({ title: "", category_id: "", flag: "", points: 100, difficulty: "easy", description: "", url: "", file: null });
+        setForm({ title: "", category_id: "", flag: "", points: 100, difficulty: "easy", description: "", url: "", file: null, hints: [] });
+        setNewHint({ content: "", cost: 0 });
         api.get("/competitions/" + selectedComp + "/challenges")
             .then(r => setChallenges(r.data.data ?? r.data));
     } catch (err: any) {
@@ -78,14 +84,21 @@ export default function AdminChallenge() {
       points: ch.points,
       difficulty: ch.difficulty,
       description: ch.description ?? "",
-      flag: "",
+      flag: ch.flag ?? "",
     });
   };
 
   const saveEdit = async (id: string) => {
     try {
-      await api.put("/challenges/" + id, editForm);
-      setChallenges(prev => prev.map(c => c.id === id ? { ...c, ...editForm } : c));
+      const payload: any = { ...editForm };
+      if (payload.flag === undefined || payload.flag === null || payload.flag === "") {
+        delete payload.flag;
+      } else {
+        payload.flag = String(payload.flag);
+      }
+
+      await api.put("/challenges/" + id, payload);
+      setChallenges(prev => prev.map(c => c.id === id ? { ...c, ...payload } : c));
       setEditingId(null);
     } catch (err: any) {
       alert(err?.response?.data?.message || "Erreur modification");
@@ -191,6 +204,53 @@ export default function AdminChallenge() {
     <input type="file" onChange={e => setForm({...form, file: e.target.files?.[0] || null})}
       className="bg-black/30 border border-white/10 rounded-lg px-4 py-3 text-white font-mono text-sm focus:outline-none focus:border-pirate-cyan/50 file:mr-3 file:bg-pirate-cyan/20 file:text-pirate-cyan file:border-0 file:rounded file:px-3 file:py-1 file:text-xs file:font-mono"
     />
+  </div>
+
+  {/* Hints */}
+  <div className="md:col-span-2 flex flex-col gap-3">
+    <label className="font-mono text-xs text-pirate-cyan uppercase tracking-widest">Indices (Hints)</label>
+    
+    {/* Ajouter un hint */}
+    <div className="flex gap-2 flex-col sm:flex-row">
+      <input type="text" value={newHint.content} onChange={e => setNewHint({...newHint, content: e.target.value})}
+        placeholder="Contenu du hint..."
+        className="flex-1 bg-black/30 border border-white/10 rounded-lg px-4 py-3 text-white font-mono text-sm focus:outline-none focus:border-pirate-cyan/50"
+      />
+      <input type="number" value={newHint.cost} onChange={e => setNewHint({...newHint, cost: Math.max(0, parseInt(e.target.value) || 0)})}
+        placeholder="Coût"
+        min={0}
+        className="w-24 bg-black/30 border border-white/10 rounded-lg px-4 py-3 text-white font-mono text-sm focus:outline-none focus:border-pirate-cyan/50"
+      />
+      <button type="button" onClick={() => {
+        if (newHint.content.trim()) {
+          setForm({...form, hints: [...form.hints, newHint]});
+          setNewHint({content: "", cost: 0});
+        }
+      }}
+        className="bg-pirate-cyan/20 hover:bg-pirate-cyan/30 text-pirate-cyan px-4 py-3 rounded-lg font-mono text-xs font-bold tracking-widest uppercase transition-all"
+      >
+        <Plus size={16} />
+      </button>
+    </div>
+
+    {/* Liste des hints */}
+    {form.hints.length > 0 && (
+      <div className="flex flex-col gap-2">
+        {form.hints.map((hint, idx) => (
+          <div key={idx} className="flex items-center justify-between bg-black/30 border border-white/10 rounded-lg px-4 py-2">
+            <div className="flex-1">
+              <p className="text-white text-sm">{hint.content}</p>
+              <p className="text-pirate-cyan text-xs">Coût: {hint.cost} pts</p>
+            </div>
+            <button type="button" onClick={() => setForm({...form, hints: form.hints.filter((_, i) => i !== idx)})}
+              className="text-red-400 hover:text-red-300 transition-colors"
+            >
+              <Trash2 size={16} />
+            </button>
+          </div>
+        ))}
+      </div>
+    )}
   </div>
 
   <div className="md:col-span-2">

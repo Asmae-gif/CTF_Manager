@@ -134,22 +134,22 @@ export default function Profile() {
   }
 
   return (
-    <div className={`flex-1 ${isAdmin ? '' : 'ml-64'} p-12 min-h-screen bg-pirate-dark overflow-y-auto`}>
+    <div className={`flex-1 ${isAdmin ? '' : 'ml-64'} p-6 md:p-12 min-h-screen bg-pirate-dark overflow-y-auto`}>
 
       {/* Header */}
-      <header className="mb-10">
+      <header className="mb-8 md:mb-10">
         <div className="font-mono text-xs text-pirate-cyan tracking-[0.3em] mb-3">// CAPTAIN'S QUARTERS</div>
-        <h1 className="font-serif text-5xl text-pirate-gold italic mb-2">Your Profile</h1>
-        <p className="text-gray-400 font-sans text-sm">Update your pirate identity.</p>
+        <h1 className="font-serif text-3xl md:text-5xl text-pirate-gold italic mb-2">Your Profile</h1>
+        <p className="text-gray-400 font-sans text-xs md:text-sm">Update your pirate identity.</p>
       </header>
 
       {error   && <p className="font-mono text-red-400 text-xs mb-6 bg-red-400/5 border border-red-400/20 px-4 py-3 rounded-lg">{error}</p>}
       {success && <p className="font-mono text-pirate-cyan text-xs mb-6 bg-pirate-cyan/5 border border-pirate-cyan/20 px-4 py-3 rounded-lg">{success}</p>}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
 
         {/* ── Colonne gauche — identité ── */}
-        <div className="lg:col-span-1 space-y-6">
+        <div className="md:col-span-1 space-y-4 md:space-y-6">
 
           {/* Avatar + infos de base */}
           <div className="bg-[#111a2e]/60 border border-white/5 rounded-2xl p-6 text-center">
@@ -219,7 +219,7 @@ export default function Profile() {
         </div>
 
         {/* ── Colonne droite — edit + badges ── */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="md:col-span-1 lg:col-span-2 space-y-4 md:space-y-6">
 
           {/* Formulaire modifier */}
           <div className="bg-[#111a2e]/60 border border-white/5 rounded-2xl p-6">

@@ -10,7 +10,7 @@ class Submission extends Model
 
     protected $fillable = [
         'challenge_id', 'team_id',
-        'user_id', 'flag_submitted', 'is_correct',
+        'user_id', 'flag_submitted', 'is_correct', 'points', 'ip_address',
     ];
 
     protected function casts(): array

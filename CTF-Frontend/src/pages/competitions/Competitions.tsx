@@ -12,7 +12,15 @@ export default function Competitions({ onSelect }: { onSelect: (id: string) => v
 
     useEffect(() => {
         getCompetitions()
-            .then(setItems)
+            .then(competitions => {
+                // Trier: ended à la fin, les autres par status
+                const sorted = competitions.sort((a, b) => {
+                    if (a.status === 'ended' && b.status !== 'ended') return 1;
+                    if (a.status !== 'ended' && b.status === 'ended') return -1;
+                    return 0;
+                });
+                setItems(sorted);
+            })
             .catch(err => setError(messageFromAxiosError(err, 'Erreur chargement.')))
             .finally(() => setLoading(false));
     }, []);
@@ -75,7 +83,6 @@ export default function Competitions({ onSelect }: { onSelect: (id: string) => v
   </span>
   <span className="flex items-center gap-1.5">
     <Flag className="h-3 w-3" />
-    {/* ✅ challenges_count ou 0 */}
     {c.challenges_count ?? 0} FLAGS
   </span>
 </div>

@@ -28,12 +28,11 @@ export default function Dashboard() {
             setCompetitions(allComps.slice(0, 3));
 
             // Compétitions actives où le participant est inscrit
-            const activeComps = allComps.filter((c: any) => c.status === 'active');
             const categories  = catsRes.data;
 
-            // Pour chaque compétition active → récupère les challenges
+            // Pour chaque compétition → récupère les challenges
             const challengesByComp = await Promise.all(
-                activeComps.map((c: any) =>
+                allComps.map((c: any) =>
                     api.get('/competitions/' + c.id + '/challenges')
                        .then(r => ({ comp: c, challenges: r.data.data ?? r.data }))
                        .catch(() => ({ comp: c, challenges: [] }))
@@ -217,7 +216,7 @@ export default function Dashboard() {
                                         <div className="flex items-center justify-between mb-1.5">
                                             <div className="flex items-center gap-2">
                                                 <span className="font-mono text-[10px] text-pirate-gold">#{i + 1}</span>
-                                                <span className="font-mono text-xs text-white uppercase tracking-widest truncate max-w-[180px]">
+                                                <span className="font-mono text-xs text-white uppercase tracking-widest truncate max-w-45">
                                                     {s.competition}
                                                 </span>
                                             </div>

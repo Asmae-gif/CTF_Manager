@@ -23,7 +23,7 @@ class CompetitionController extends Controller
         $competitions = Competition::public()
             ->when($request->status, fn($q) => $q->where('status', $request->status))
             ->when($request->search, fn($q) => $q->where('title', 'like', "%{$request->search}%"))
-            ->withCount('teams')
+            ->withCount('teams', 'challenges')
             ->orderByDesc('created_at')
             ->paginate(10);
 

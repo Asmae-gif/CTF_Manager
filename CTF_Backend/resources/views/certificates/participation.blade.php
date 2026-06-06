@@ -38,7 +38,7 @@
             height: 100%;
             display: flex;
             flex-direction: column;
-            padding: 32px 48px;
+            padding: 28px 40px; /* Légèrement réduit pour éviter le débordement sur 2 pages */
             border: 2px solid rgba(255,183,3,0.25);
         }
 
@@ -60,7 +60,7 @@
             display: flex;
             align-items: flex-start;
             justify-content: space-between;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
 
         .logo-block {
@@ -106,7 +106,7 @@
         /* ── Titre central ── */
         .title-block {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
         .title-label {
@@ -139,7 +139,7 @@
         .divider {
             height: 1px;
             background: linear-gradient(to right, transparent, rgba(255,183,3,0.4), transparent);
-            margin: 12px 0;
+            margin: 10px 0;
         }
 
         /* ── Infos principales ── */
@@ -147,7 +147,7 @@
             display: flex;
             justify-content: space-between;
             gap: 16px;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
         }
 
         .info-card {
@@ -155,7 +155,7 @@
             background: rgba(255,255,255,0.03);
             border: 1px solid rgba(255,255,255,0.08);
             border-radius: 8px;
-            padding: 14px 18px;
+            padding: 12px 16px;
         }
 
         .info-card.highlight {
@@ -192,7 +192,7 @@
             border-left: 3px solid #ffb703;
             border-radius: 0 6px 6px 0;
             padding: 10px 16px;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
             font-size: 11px;
             color: #ffb703;
             font-family: 'Courier New', monospace;
@@ -205,7 +205,7 @@
             justify-content: space-between;
             align-items: flex-end;
             margin-top: auto;
-            padding-top: 12px;
+            padding-top: 10px;
             border-top: 1px solid rgba(255,255,255,0.06);
         }
 
@@ -254,15 +254,15 @@
         }
 
         .seal-circle {
-            width: 56px;
-            height: 56px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             border: 2px solid rgba(255,183,3,0.4);
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 4px;
-            font-size: 22px;
+            font-size: 20px;
         }
 
         .seal-text {
@@ -319,7 +319,7 @@
             <div class="info-label">Pirate</div>
             <div class="info-value gold">{{ $participant_name }}</div>
             @if(!empty($team_name))
-            <div style="margin-top: 4px; font-size: 9px; font-family: 'Courier New', monospace; color: rgba(255,255,255,0.4); letter-spacing: 2px; text-transform: uppercase;">
+            <div style="margin-top: 4px; font-size: 9px; font-family: 'DejaVu Sans', 'Courier New', monospace; color: rgba(255,255,255,0.4); letter-spacing: 2px; text-transform: uppercase;">
                 Équipe : {{ $team_name }}
             </div>
             @endif

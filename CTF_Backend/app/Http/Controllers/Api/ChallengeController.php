@@ -16,16 +16,32 @@ class ChallengeController extends Controller
     // ─── Liste des challenges d'une compétition ───────────
     public function index(Competition $competition)
     {
+        $user = \Illuminate\Support\Facades\Auth::guard('sanctum')->user();
+        $team = $user ? $user->leadingTeam : null;
+
         $challenges = $competition->challenges()
             ->active()
             ->withCount('hints')
             ->with('category:id,name,icon,color')
             ->get()
-            ->map(function ($c) {
-                return collect($c)->except('flag');
+            ->map(function ($c) use ($team) {
+                $solved = false;
+                if ($team) {
+                    $solved = \App\Models\Submission::where('team_id', $team->id)
+                        ->where('challenge_id', $c->id)
+                        ->where('is_correct', true)
+                        ->exists();
+                }
+
+                return collect($c)
+                    ->except('flag')
+                    ->put('solved', $solved);
             });
 
-        return response()->json($challenges);
+        return response()->json($challenges)
+            ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', '0');
     }
 public function banIp($ip)
 {
@@ -42,7 +58,7 @@ public function unbanIp($ip)
     // ─── Voir un challenge (sans le flag) ─────────────────
     public function show(Challenge $challenge)
     {
-        $data = $challenge->load('hints:id,challenge_id,cost,order', 'category:id,name,icon,color');
+        $data = $challenge->load('hints:id,challenge_id,cost,order,content', 'category:id,name,icon,color');
         return response()->json(collect($data)->except('flag'));
     }
 
@@ -56,30 +72,36 @@ public function unbanIp($ip)
             'difficulty'  => 'required|in:easy,medium,hard',
             'points'      => 'required|integer|min:1',
             'flag'        => 'required|string',
-            'file_path'   => 'nullable|string',
+            'url'         => 'nullable|url',
+            'file'        => 'nullable|file|max:10240',
             'is_active'   => 'boolean',
+            'hints'       => 'nullable|json',
         ]);
-         $data = $request->validate([
-    'title'       => 'required|string|max:150',
-    'description' => 'required|string',
-    'category_id' => 'required|exists:categories,id',
-    'difficulty'  => 'required|in:easy,medium,hard',
-    'points'      => 'required|integer|min:1',
-    'flag'        => 'required|string',
-    'url'         => 'nullable|url',
-    'file'        => 'nullable|file|max:10240',
-    'is_active'   => 'boolean',
-]);
 
-// Upload fichier
-if ($request->hasFile('file')) {
-    $data['file_path'] = $request->file('file')->store('challenges', 'public');
-}
+        // Upload fichier
+        if ($request->hasFile('file')) {
+            $data['file_path'] = $request->file('file')->store('challenges', 'public');
+        }
 
-unset($data['file']);
-$challenge = $competition->challenges()->create($data);
-return response()->json($challenge, 201);
-       
+        unset($data['file']);
+        $challenge = $competition->challenges()->create($data);
+
+        // Créer les hints
+        if ($request->has('hints')) {
+            $hints = json_decode($request->input('hints'), true);
+            if (is_array($hints)) {
+                foreach ($hints as $order => $hint) {
+                    Hint::create([
+                        'challenge_id' => $challenge->id,
+                        'content' => $hint['content'] ?? '',
+                        'cost' => $hint['cost'] ?? 0,
+                        'order' => $order,
+                    ]);
+                }
+            }
+        }
+
+        return response()->json($challenge, 201);
     }
 
     // ─── Modifier un challenge (admin) ────────────────────
@@ -274,13 +296,32 @@ return response()->json($challenge, 201);
             cache()->forget($teamFailCount);
             cache()->forget($ipFailCount);
 
-            $team->increment('score', $challenge->points);
-            $user->increment('score', $challenge->points);
+            // Calculer les points finaux en fonction des hints utilisés
+            $usedHints = Hint::where('challenge_id', $cid)
+                ->whereHas('teams', fn($q) => $q->where('team_id', $tid))
+                ->sum('cost');
+
+            $finalPoints = max(0, $challenge->points - $usedHints);
+
+            $team->increment('score', $finalPoints);
+            $user->increment('score', $finalPoints);
+
+            // Mettre à jour la soumission avec les points réels
+            $submission = Submission::where('challenge_id', $cid)
+                ->where('team_id', $tid)
+                ->where('user_id', $user->id)
+                ->latest()
+                ->first();
+
+            if ($submission) {
+                $submission->update(['points' => $finalPoints]);
+            }
 
             return response()->json([
                 'correct' => true,
                 'message' => '🎉 Bravo ! Flag correct !',
-                'points'  => $challenge->points,
+                'points'  => $finalPoints,
+                'hint_reduction' => $usedHints,
             ]);
         }
 
